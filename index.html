@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AstroVrat · CelestialFest</title>
+<style>
+:root{color-scheme:dark;--bg:#0B0F19;--gold:#E8C872;--silver:#C9D1E0;--card:rgba(255,255,255,.07);--line:rgba(232,200,114,.25);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--silver);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Devanagari",sans-serif}
+.sky{position:relative;height:230px;overflow:hidden}
+.sky canvas{position:absolute;inset:0;width:100%;height:100%}
+.sky .t{position:absolute;left:0;right:0;bottom:14px;text-align:center}
+h1{margin:0;color:var(--gold);font-size:28px;letter-spacing:.5px}
+.sub{font-size:13px;opacity:.85}
+main{max-width:960px;margin:0 auto;padding:12px 14px 40px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-bottom:12px}
+button,select{background:var(--card);color:var(--silver);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font:inherit;cursor:pointer}
+button:hover{border-color:var(--gold)}
+button.g{background:linear-gradient(135deg,#E8C872,#b8923a);color:#1a1405;border:0;font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.card h2{margin:0 0 8px;font-size:16px;color:var(--gold)}
+.row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed rgba(255,255,255,.08)}
+.row:last-child{border:0}
+.big{font-size:34px;color:#fff}
+.cd{display:flex;gap:6px;margin:6px 0}
+.cd div{flex:1;text-align:center;background:rgba(0,0,0,.3);border-radius:8px;padding:6px 0;font-size:20px;color:#fff}
+.cd small{display:block;font-size:10px;color:var(--silver)}
+.sec{margin:22px 0 10px;color:var(--gold);font-size:18px}
+.note{font-size:12px;opacity:.7}
+.table{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:420px}
+td,th{padding:6px 8px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08)}
+#conf{position:fixed;inset:0;pointer-events:none;z-index:9}
+#city{background:rgba(0,0,0,.3);color:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font:inherit;min-width:0;flex:1}
+#chatlog{max-height:260px;overflow-y:auto;margin-bottom:10px}
+.msg{padding:8px 12px;border-radius:12px;margin:6px 0;white-space:pre-wrap;max-width:90%}
+.me{background:rgba(232,200,114,.18);margin-left:auto}
+.ai{background:rgba(0,0,0,.3)}
+#chatf{display:flex;gap:8px}
+#q{flex:1;min-width:0;background:rgba(0,0,0,.3);color:#fff;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.card{transition:transform .25s,box-shadow .25s,opacity .6s}
+.js .card{opacity:0;transform:translateY(22px)}
+.js .card.in{opacity:1;transform:none}
+.js .card.in:hover{transform:translateY(-4px);box-shadow:0 8px 28px rgba(232,200,114,.2)}
+h1{animation:gl 3s ease-in-out infinite alternate}
+@keyframes gl{to{text-shadow:0 0 18px rgba(232,200,114,.75)}}
+button{transition:transform .15s,box-shadow .2s}button:active{transform:scale(.94)}button.g:hover{box-shadow:0 0 14px rgba(232,200,114,.6)}
+.swing{transform-origin:top center;animation:swing .8s ease 3}
+@keyframes swing{0%,100%{transform:rotate(0)}25%{transform:rotate(22deg)}75%{transform:rotate(-22deg)}}
+#diyaw{cursor:pointer;text-align:center;-webkit-tap-highlight-color:transparent}
+.flame{opacity:0;transform-box:fill-box;transform-origin:50% 100%}.glow{opacity:0;transition:opacity .6s}
+.on .flame{opacity:1;animation:fl .15s infinite alternate}.on .glow{opacity:.5}
+@keyframes fl{from{transform:scale(1) rotate(-3deg)}to{transform:scale(.9,1.1) rotate(3deg)}}
+input[type=range]{accent-color:#E8C872}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.js .card{opacity:1;transform:none}}
+.chips button{font-size:13px;padding:5px 10px}
+</style>
+</head>
+<body>
+<div class="sky"><canvas id="sky"></canvas>
+<div class="t"><h1>🌙 AstroVrat</h1><div class="sub" data-i="tag"></div></div></div>
+<main>
+<div class="bar">
+<span id="loc" class="note"></span>
+<span><button id="gps"></button> <button id="lang">हिन्दी</button></span>
+</div>
+<div class="grid">
+<div class="card"><h2 data-i="sun"></h2><div id="sunr"></div></div>
+<div class="card"><h2 data-i="moon"></h2><div id="moonr"></div></div>
+<div class="card"><h2 data-i="star"></h2><div class="big" id="clar"></div><div class="note" data-i="clnote"></div></div>
+<div class="card"><h2 data-i="next"></h2><div class="big" id="nextm">—</div><div class="note" id="nextl"></div></div>
+<div class="card"><h2 data-i="tithi"></h2><div class="big" id="tithi"></div><div class="note" data-i="tnote"></div></div>
+</div>
+
+<div class="sec" data-i="mp"></div>
+<div class="card"><div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><canvas id="mc" width="120" height="120"></canvas><div style="flex:1;min-width:200px"><div class="big" id="mdate"></div><div id="minfo" style="margin-bottom:8px"></div><div style="display:flex;gap:8px;align-items:center"><button id="mplay">▶</button><input type="range" id="msl" min="-15" max="15" value="0" style="flex:1"></div></div></div></div>
+
+<div class="sec" data-i="fest"></div>
+<div class="grid" id="fests"></div>
+
+<div class="sec" data-i="fam"></div>
+<div class="card">
+<div class="bar"><input id="city" list="cl" placeholder="Search city / शहर खोजें" autocomplete="off"><datalist id="cl"></datalist><button id="add" data-i="add"></button><button id="wa" class="g" data-i="share"></button></div>
+<div class="table"><table><thead><tr><th data-i="city"></th><th data-i="moonrise"></th><th data-i="sunset"></th></tr></thead><tbody id="fam"></tbody></table></div>
+<div class="note" data-i="ist"></div>
+<div id="shbox"></div>
+</div>
+
+<div class="sec" data-i="chk"></div>
+<div class="card" id="chkbox"></div>
+
+<div class="sec" data-i="ask"></div>
+<div class="card" id="aicard">
+<div class="chips" id="chips"></div>
+<div id="chatlog"></div>
+<div id="chatf"><input id="q" autocomplete="off"><button id="send" class="g">➤</button></div>
+<div class="note" data-i="ainote"></div>
+</div>
+
+<div class="sec" data-i="pooja"></div>
+<div class="card" style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><div id="diyaw"><svg viewBox="0 0 120 100" width="120" height="100"><circle class="glow" cx="60" cy="42" r="40" fill="#ffb347"/><path d="M18 68 Q60 108 102 68 Z" fill="#b8923a"/><path class="flame" d="M60 18 Q74 40 60 60 Q46 40 60 18Z" fill="#ffd45e"/></svg><div class="note" data-i="diya"></div></div><div><button id="bell" class="g"><span id="bi" style="display:inline-block">🔔</span> <span data-i="bell"></span></button> <button id="shankh">🐚 <span data-i="shankh"></span></button></div></div>
+</main>
+<canvas id="conf"></canvas>
+
+<script>
+(function(){
+var T={en:{tag:"Sun · Moon · Festivals for every family",ask:"🤖 Ask AstroVrat",next:"🌙 Next moonrise in",tithi:"📅 Today’s tithi",tnote:"Approximate. Check your panchang.",chk:"🪔 Pooja checklist",reset:"Reset",diya:"Tap the diya to light it",mp:"🌗 Moon phase explorer",sh:"Shukla Paksha",kr:"Krishna Paksha",ph:"Ask about a festival, vrat or the moon…",ainote:"AI answers can be wrong. Check your local panchang for exact muhurat.",thinking:"Thinking…",aierr:"AI is not available right now.",c1:"Why is moon seen on Karwa Chauth?",c2:"What is Chhath Puja?",c3:"Is tonight good for stargazing?",sun:"☀️ Sun",moon:"🌙 Moon",star:"✨ Stargazing score",clnote:"Based on moon brightness. Cloud cover not included.",fest:"Festival countdowns",fam:"Family city tracker",add:"Add city",share:"Share on WhatsApp",city:"City",moonrise:"Moonrise",sunset:"Sunset",ist:"All times in IST.",pooja:"Pooja corner",bell:"Temple bell",shankh:"Shankh",gps:"📍 Use my location",rise:"Rise",set:"Set",phase:"Phase",illum:"Illumination",d:"Days",h:"Hrs",m:"Min",s:"Sec",done:"Ritual complete ✓",today:"Today is the day!",none:"No rise today",loc:"Location"},
+hi:{tag:"सूरज · चाँद · त्योहार, पूरे परिवार के लिए",ask:"🤖 AstroVrat से पूछिए",next:"🌙 अगला चंद्रोदय इतनी देर में",tithi:"📅 आज की तिथि",tnote:"अंदाज़ा। पंचांग से मिला लें।",chk:"🪔 पूजा चेकलिस्ट",reset:"साफ़ करें",diya:"दीया जलाने के लिए छुएँ",mp:"🌗 चाँद की कला देखिए",sh:"शुक्ल पक्ष",kr:"कृष्ण पक्ष",ph:"त्योहार, व्रत या चाँद के बारे में पूछिए…",ainote:"AI का जवाब गलत हो सकता है। सही मुहूर्त के लिए अपना पंचांग देखें।",thinking:"सोच रहा हूँ…",aierr:"AI अभी उपलब्ध नहीं है।",c1:"करवा चौथ पर चाँद क्यों देखते हैं?",c2:"छठ पूजा क्या है?",c3:"क्या आज रात तारे देखने लायक है?",sun:"☀️ सूरज",moon:"🌙 चाँद",star:"✨ तारे देखने का स्कोर",clnote:"चाँद की चमक पर आधारित। बादल शामिल नहीं।",fest:"त्योहार काउंटडाउन",fam:"परिवार के शहर",add:"शहर जोड़ें",share:"व्हाट्सऐप पर भेजें",city:"शहर",moonrise:"चंद्रोदय",sunset:"सूर्यास्त",ist:"सारे समय भारतीय समय (IST) में।",pooja:"पूजा कोना",bell:"मंदिर की घंटी",shankh:"शंख",gps:"📍 मेरी लोकेशन",rise:"उदय",set:"अस्त",phase:"कला",illum:"चमक",d:"दिन",h:"घंटे",m:"मिनट",s:"सेकंड",done:"पूजा पूरी ✓",today:"आज वही दिन है!",none:"आज उदय नहीं",loc:"स्थान"}};
+var lang="en",pos={name:"Meerut",lat:28.98,lng:77.71};
+var CITIES=[["Delhi",28.61,77.21],["Mumbai",19.08,72.88],["Kolkata",22.57,88.36],["Chennai",13.08,80.27],["Jaipur",26.91,75.79],["Lucknow",26.85,80.95],["Patna",25.59,85.14],["Meerut",28.98,77.71],["Ahmedabad",23.02,72.57],["Hyderabad",17.39,78.49],["Bengaluru",12.97,77.59],["Pune",18.52,73.86],["Bhopal",23.26,77.41],["Chandigarh",30.73,76.78],["Varanasi",25.32,82.99],["Dehradun",30.32,78.03],["Ranchi",23.34,85.31]];
+var fam=[CITIES[0],CITIES[1],CITIES[7]];
+// Festival dates (approximate, verify with your local panchang)
+var FEST=[["Dhanteras","धनतेरस","2026-11-06"],["Diwali","दिवाली","2026-11-08"],["Bhai Dooj","भाई दूज","2026-11-11"],["Makar Sankranti","मकर संक्रांति","2027-01-14"],["Maha Shivratri","महाशिवरात्रि","2027-03-06"],["Holi","होली","2027-03-22"],["Ram Navami","राम नवमी","2027-04-15"],["Chhath Puja","छठ पूजा","2026-11-15"],["Dev Diwali","देव दिवाली","2026-11-24"],["Sharad Purnima","शरद पूर्णिमा","2027-10-15"],["Karwa Chauth","करवा चौथ","2027-10-18"]];
+var $=function(i){return document.getElementById(i)};
+function tr(k){return T[lang][k]}
+
+// ---- astronomy (low-precision, SunCalc-style) ----
+var R=Math.PI/180,E=R*23.4397,PI=Math.PI;
+function days(t){return t/864e5-0.5+2440588-2451545}
+function ra(l,b){return Math.atan2(Math.sin(l)*Math.cos(E)-Math.tan(b)*Math.sin(E),Math.cos(l))}
+function dc(l,b){return Math.asin(Math.sin(b)*Math.cos(E)+Math.cos(b)*Math.sin(E)*Math.sin(l))}
+function sunC(d){var M=R*(357.5291+0.98560028*d),C=R*(1.9148*Math.sin(M)+0.02*Math.sin(2*M)+0.0003*Math.sin(3*M)),L=M+C+R*102.9372+PI;return{dec:dc(L,0),ra:ra(L,0)}}
+function moonC(d){var L=R*(218.316+13.176396*d),M=R*(134.963+13.064993*d),F=R*(93.272+13.22935*d),l=L+R*6.289*Math.sin(M),b=R*5.128*Math.sin(F);return{ra:ra(l,b),dec:dc(l,b),dist:385001-20905*Math.cos(M)}}
+function alt(c,t,lat,lng){var d=days(t),H=R*(280.16+360.9856235*d)-(-lng*R)-c.ra,p=lat*R;return Math.asin(Math.sin(p)*Math.sin(c.dec)+Math.cos(p)*Math.cos(c.dec)*Math.cos(H))}
+function sunAlt(t,la,ln){return alt(sunC(days(t)),t,la,ln)-(-0.833*R)}
+function moonAlt(t,la,ln){return alt(moonC(days(t)),t,la,ln)-0.133*R}
+function dayStart(){return Math.floor((Date.now()+19800000)/864e5)*864e5-19800000}
+function events(fn,la,ln){var t0=dayStart(),r=null,s=null,p=fn(t0,la,ln),st=600000;
+ for(var t=t0+st;t<=t0+864e5;t+=st){var a=fn(t,la,ln);if(p<0&&a>=0&&r===null)r=t-st+st*(-p/(a-p));if(p>=0&&a<0&&s===null)s=t-st+st*(p/(p-a));p=a}
+ return{rise:r,set:s}}
+function phase(t0){var t=t0||Date.now(),d=days(t),s=sunC(d),m=moonC(d),sd=149598000,
+ ph=Math.acos(Math.sin(s.dec)*Math.sin(m.dec)+Math.cos(s.dec)*Math.cos(m.dec)*Math.cos(s.ra-m.ra)),
+ inc=Math.atan2(sd*Math.sin(ph),m.dist-sd*Math.cos(ph)),
+ ang=Math.atan2(Math.cos(s.dec)*Math.sin(s.ra-m.ra),Math.sin(s.dec)*Math.cos(m.dec)-Math.cos(s.dec)*Math.sin(m.dec)*Math.cos(s.ra-m.ra));
+ return{f:(1+Math.cos(inc))/2,p:0.5+0.5*inc*(ang<0?-1:1)/PI}}
+function pname(p){var n=[["New Moon","अमावस्या"],["Waxing Crescent","शुक्ल पक्ष (बढ़ता)"],["First Quarter","अष्टमी (शुक्ल)"],["Waxing Gibbous","बढ़ता गिब्बस"],["Full Moon","पूर्णिमा"],["Waning Gibbous","घटता गिब्बस"],["Last Quarter","अष्टमी (कृष्ण)"],["Waning Crescent","कृष्ण पक्ष (घटता)"]];return n[Math.round(p*8)%8][lang=="en"?0:1]}
+function fmt(t){return t?new Date(t).toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit",timeZone:"Asia/Kolkata"}):"—"}
+
+// ---- render ----
+function render(){
+ document.querySelectorAll("[data-i]").forEach(function(e){e.textContent=tr(e.dataset.i)});
+ $("gps").textContent=tr("gps");$("lang").textContent=lang=="en"?"हिन्दी":"English";
+ $("loc").textContent=tr("loc")+": "+pos.name+" ("+pos.lat.toFixed(2)+", "+pos.lng.toFixed(2)+")";
+ var S=events(sunAlt,pos.lat,pos.lng),M=events(moonAlt,pos.lat,pos.lng),P=phase();
+ function rw(a,b){return'<div class="row"><span>'+a+'</span><b>'+b+'</b></div>'}
+ $("sunr").innerHTML=rw(tr("rise"),fmt(S.rise))+rw(tr("set"),fmt(S.set));
+ $("moonr").innerHTML=rw(tr("rise"),M.rise?fmt(M.rise):tr("none"))+rw(tr("set"),M.set?fmt(M.set):tr("none"))+rw(tr("phase"),pname(P.p))+rw(tr("illum"),Math.round(P.f*100)+"%");
+ $("clar").textContent=Math.round(100-P.f*70)+"/100";
+ window._nr=nextRise();$("tithi").textContent=tithiTxt(P.p);fams();fests();chips();renderChk();window._S=S;window._M=M;mp();reveal();
+}
+function fams(){var h="",txt="🌙 AstroVrat\n";
+ fam.forEach(function(c){var m=events(moonAlt,c[1],c[2]),s=events(sunAlt,c[1],c[2]);
+  h+="<tr><td>"+c[0]+"</td><td>"+(m.rise?fmt(m.rise):"—")+"</td><td>"+fmt(s.set)+"</td></tr>";
+  txt+=c[0]+": "+tr("moonrise")+" "+(m.rise?fmt(m.rise):"—")+"\n"});
+ $("fam").innerHTML=h;$("wa").onclick=function(){share(txt)}}
+function fests(){var now=Date.now(),up=FEST.map(function(f){return{n:f[lang=="en"?0:1],t:new Date(f[2]+"T00:00:00+05:30").getTime()}}).filter(function(f){return f.t+864e5>now}).sort(function(a,b){return a.t-b.t}).slice(0,4),h="";
+ up.forEach(function(f,i){h+='<div class="card"><h2>🪔 '+f.n+'</h2><div class="note">'+new Date(f.t).toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric",timeZone:"Asia/Kolkata"})+'</div><div class="cd" id="cd'+i+'" data-t="'+f.t+'"></div><button class="g" onclick="celebrate()">'+tr("done")+'</button></div>'});
+ $("fests").innerHTML=h;tick()}
+function tick(){if(window._nr){var q=window._nr-Date.now();if(q>0){$("nextm").textContent=Math.floor(q/36e5)+"h "+Math.floor(q%36e5/6e4)+"m "+Math.floor(q%6e4/1e3)+"s";$("nextl").textContent=fmt(window._nr)+" IST"}}document.querySelectorAll(".cd").forEach(function(e){var d=+e.dataset.t-Date.now();if(d<=0){e.innerHTML="<div style='font-size:15px'>"+tr("today")+"</div>";return}
+ var D=Math.floor(d/864e5),H=Math.floor(d%864e5/36e5),Mi=Math.floor(d%36e5/6e4),Se=Math.floor(d%6e4/1e3);
+ e.innerHTML=[[D,"d"],[H,"h"],[Mi,"m"],[Se,"s"]].map(function(x){return"<div>"+x[0]+"<small>"+tr(x[1])+"</small></div>"}).join("")})}
+setInterval(tick,1000);
+
+// ---- city select ----
+var MORE="Agra,27.18,78.01;Aligarh,27.88,78.08;Prayagraj,25.44,81.85;Amritsar,31.63,74.87;Aurangabad,19.88,75.34;Bareilly,28.35,79.43;Belagavi,15.85,74.50;Bhubaneswar,20.30,85.82;Bikaner,28.02,73.31;Bilaspur,22.08,82.14;Coimbatore,11.02,76.96;Cuttack,20.46,85.88;Dhanbad,23.80,86.43;Faridabad,28.41,77.31;Firozabad,27.15,78.40;Ghaziabad,28.67,77.45;Gorakhpur,26.76,83.37;Gurugram,28.46,77.03;Guwahati,26.14,91.74;Gwalior,26.22,78.18;Haridwar,29.95,78.16;Hubballi,15.36,75.12;Imphal,24.82,93.95;Indore,22.72,75.86;Itanagar,27.08,93.61;Jabalpur,23.18,79.99;Jalandhar,31.33,75.58;Jammu,32.73,74.87;Jamnagar,22.47,70.07;Jamshedpur,22.80,86.20;Jodhpur,26.29,73.02;Kanpur,26.45,80.35;Kochi,9.93,76.27;Kohima,25.67,94.11;Kolhapur,16.70,74.24;Kota,25.18,75.84;Kozhikode,11.26,75.78;Ludhiana,30.90,75.86;Madurai,9.93,78.12;Mangaluru,12.91,74.86;Mathura,27.49,77.67;Mysuru,12.30,76.64;Nagpur,21.15,79.09;Nashik,20.00,73.79;Noida,28.54,77.39;Panaji,15.50,73.83;Patiala,30.34,76.39;Puducherry,11.93,79.83;Raipur,21.25,81.63;Rajkot,22.30,70.80;Saharanpur,29.97,77.55;Shillong,25.57,91.88;Shimla,31.10,77.17;Siliguri,26.73,88.40;Srinagar,34.08,74.80;Surat,21.17,72.83;Thiruvananthapuram,8.52,76.94;Tiruchirappalli,10.79,78.70;Udaipur,24.59,73.71;Ujjain,23.18,75.78;Vadodara,22.31,73.18;Vijayawada,16.51,80.65;Visakhapatnam,17.69,83.22;Warangal,17.97,79.59;Ayodhya,26.80,82.20;Moradabad,28.84,78.78;Muzaffarpur,26.12,85.39;Gaya,24.80,85.00;Bhagalpur,25.24,86.97;Agartala,23.83,91.28;Aizawl,23.73,92.72;Gangtok,27.34,88.61;Port Blair,11.62,92.73;Leh,34.15,77.58;Solapur,17.66,75.91;Amravati,20.93,77.75;Nanded,19.14,77.32;Salem,11.66,78.15;Tirupati,13.63,79.42;Guntur,16.31,80.44;Nellore,14.44,79.99;Rourkela,22.26,84.85;Durgapur,23.55,87.32;Asansol,23.68,86.98;Jhansi,25.45,78.57;Rishikesh,30.09,78.27;Nainital,29.39,79.46;Haldwani,29.22,79.51;Rewari,28.20,76.62;Rohtak,28.90,76.61;Hisar,29.15,75.72;Ambala,30.38,76.78;Karnal,29.69,76.99;Panipat,29.39,76.97;Sonipat,28.99,77.02;Alwar,27.55,76.63;Ajmer,26.45,74.64;Bhilwara,25.35,74.64;Sikar,27.61,75.14;Pushkar,26.49,74.55;Dwarka,22.24,68.97;Somnath,20.89,70.40;Bhavnagar,21.76,72.15;Gandhinagar,23.22,72.65;Silvassa,20.27,73.02;Daman,20.40,72.83;Vrindavan,27.58,77.70;Kurukshetra,29.97,76.88;Bodh Gaya,24.70,84.99;Darbhanga,26.15,85.90;Purnia,25.78,87.47;Satna,24.60,80.83;Rewa,24.53,81.30;Sagar,23.84,78.74;Bhilai,21.21,81.38;Korba,22.35,82.68;Sambalpur,21.47,83.97;Puri,19.81,85.83;Berhampur,19.31,84.79;Kharagpur,22.35,87.32;Howrah,22.59,88.26;Malda,25.01,88.14;Darjeeling,27.04,88.26;Dibrugarh,27.47,94.91;Silchar,24.83,92.78;Jorhat,26.76,94.20;Thrissur,10.53,76.21;Kollam,8.89,76.61;Vellore,12.92,79.13;Thanjavur,10.79,79.14;Erode,11.34,77.72;Tirunelveli,8.73,77.70;Kanyakumari,8.09,77.54;Rameswaram,9.29,79.31;Davangere,14.46,75.92;Ballari,15.14,76.92;Kalaburagi,17.33,76.83;Shivamogga,13.93,75.57;Karimnagar,18.44,79.13;Nizamabad,18.67,78.09;Kurnool,15.83,78.04;Anantapur,14.68,77.60;Kadapa,14.47,78.82;Rajahmundry,17.00,81.80;Kakinada,16.96,82.24;Latur,18.40,76.58;Akola,20.71,77.00;Jalgaon,21.01,75.56;Satara,17.69,74.00;Sangli,16.85,74.57;Shirdi,19.77,74.48;Pandharpur,17.68,75.33;Ratnagiri,16.99,73.30";
+MORE.split(";").forEach(function(s){var a=s.split(",");if(!CITIES.some(function(c){return c[0]==a[0]}))CITIES.push([a[0],+a[1],+a[2]])});
+CITIES.sort(function(a,b){return a[0]<b[0]?-1:1});
+CITIES.forEach(function(c){var o=document.createElement("option");o.value=c[0];$("cl").appendChild(o)});
+$("add").onclick=function(){var v=$("city").value.trim().toLowerCase(),c=CITIES.filter(function(x){return x[0].toLowerCase()==v})[0];if(!c)return;if(!fam.some(function(x){return x[0]==c[0]}))fam.push(c);$("city").value="";fams()};
+$("lang").onclick=function(){lang=lang=="en"?"hi":"en";document.documentElement.lang=lang;render()};
+$("gps").onclick=function(){if(!navigator.geolocation)return;navigator.geolocation.getCurrentPosition(function(p){pos={name:"GPS",lat:p.coords.latitude,lng:p.coords.longitude};render()},function(){})};
+
+// ---- tithi, next moonrise, checklist ----
+var TN={en:["Pratipada","Dwitiya","Tritiya","Chaturthi","Panchami","Shashthi","Saptami","Ashtami","Navami","Dashami","Ekadashi","Dwadashi","Trayodashi","Chaturdashi"],hi:["प्रतिपदा","द्वितीया","तृतीया","चतुर्थी","पंचमी","षष्ठी","सप्तमी","अष्टमी","नवमी","दशमी","एकादशी","द्वादशी","त्रयोदशी","चतुर्दशी"]};
+function tithiTxt(p){var n=Math.floor(p*30)%30,i=n%15,nm=i==14?(n==14?(lang=="en"?"Purnima":"पूर्णिमा"):(lang=="en"?"Amavasya":"अमावस्या")):TN[lang][i];return nm+(i==14?"":" · "+tr(n<15?"sh":"kr"))}
+function nextRise(){var t=Date.now(),p=moonAlt(t,pos.lat,pos.lng);for(var i=1;i<=180;i++){var a=moonAlt(t+i*600000,pos.lat,pos.lng);if(p<0&&a>=0)return t+i*600000;p=a}return null}
+var CHK={en:["Diya, ghee and matchbox","Fresh flowers","Kalash with water","Prasad / sweets","Pooja thali ready","Family told the moonrise time"],hi:["दीया, घी और माचिस","ताज़े फूल","पानी से भरा कलश","प्रसाद / मिठाई","पूजा की थाली तैयार","परिवार को चंद्रोदय का समय बताया"]};
+function ld(){try{return JSON.parse(localStorage.getItem("av_chk")||"{}")}catch(e){return{}}}
+function sv(s){try{localStorage.setItem("av_chk",JSON.stringify(s))}catch(e){}}
+function renderChk(){var s=ld(),h="";CHK[lang].forEach(function(x,i){h+='<label class="row" style="cursor:pointer"><span><input type="checkbox" data-k="'+i+'"'+(s[i]?" checked":"")+'> '+x+'</span></label>'});
+ $("chkbox").innerHTML=h+'<button id="rst" style="margin-top:8px">'+tr("reset")+'</button>';
+ $("chkbox").querySelectorAll("input").forEach(function(c){c.onchange=function(){var s=ld();s[c.dataset.k]=c.checked;sv(s)}});
+ $("rst").onclick=function(){sv({});renderChk()}}
+
+// ---- share ----
+function share(txt){var u="https://wa.me/?text="+encodeURIComponent(txt),b=$("shbox");
+ function fb(){b.innerHTML='<textarea id="stx" readonly rows="'+(txt.split("\n").length+1)+'" style="width:100%;margin-top:10px;background:rgba(0,0,0,.3);color:#fff;border:1px solid var(--line);border-radius:10px;padding:8px;font:inherit"></textarea><div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button id="cp" class="g">Copy</button><a href="'+u+'" target="_blank" rel="noopener" style="color:var(--gold);align-self:center">WhatsApp ↗</a></div>';$("stx").value=txt;$("cp").onclick=function(){var t=$("stx");t.select();var ok=false;try{ok=document.execCommand("copy")}catch(e){}this.textContent=ok?"Copied ✓":"Select & copy"}}
+ if(navigator.share){navigator.share({text:txt}).catch(function(e){if(!e||e.name!="AbortError")fb()});return}
+ var w=null;try{w=window.open(u,"_blank")}catch(e){}
+ if(!w)fb()}
+// ---- animations & interaction ----
+document.documentElement.className="js";
+function reveal(){var els=document.querySelectorAll(".card:not(.in)");if(!window.IntersectionObserver){els.forEach(function(e){e.classList.add("in")});return}var io=new IntersectionObserver(function(en){en.forEach(function(x){if(x.isIntersecting){x.target.classList.add("in");io.unobserve(x.target)}})},{threshold:.1});els.forEach(function(e){io.observe(e)})}
+setTimeout(function(){document.querySelectorAll(".card").forEach(function(e){e.classList.add("in")})},3000);
+function drawMoon(p){var c=$("mc"),x=c.getContext("2d"),r=54,q=p<.5?p:1-p,k=Math.cos(2*PI*q);x.clearRect(0,0,120,120);x.save();if(p>=.5){x.translate(120,0);x.scale(-1,1)}x.beginPath();x.arc(60,60,r,0,6.28);x.fillStyle="#1d2540";x.fill();x.beginPath();x.arc(60,60,r,-PI/2,PI/2,false);x.ellipse(60,60,Math.max(Math.abs(k)*r,.01),r,0,PI/2,-PI/2,k>0);x.closePath();x.shadowColor="#dfe6ff";x.shadowBlur=20;x.fillStyle="#f1ecd7";x.fill();x.restore()}
+function mp(){var o=+$("msl").value,t=Date.now()+o*864e5,P=phase(t);drawMoon(P.p);$("mdate").textContent=new Date(t).toLocaleDateString(lang=="en"?"en-IN":"hi-IN",{day:"numeric",month:"short",timeZone:"Asia/Kolkata"});$("minfo").textContent=pname(P.p)+" · "+Math.round(P.f*100)+"% · "+tithiTxt(P.p)}
+$("msl").oninput=mp;
+var pl=null;$("mplay").onclick=function(){if(pl){clearInterval(pl);pl=null;this.textContent="▶";return}this.textContent="⏸";pl=setInterval(function(){var s=$("msl");s.value=+s.value>=15?-15:+s.value+1;mp()},350)};
+$("diyaw").onclick=function(){this.classList.toggle("on");tone(520,.3,"triangle",.08)};
+
+// ---- AI assistant ----
+var hist=[],sampleFn=null;
+function addMsg(c,t){var d=document.createElement("div");d.className="msg "+c;d.textContent=t;$("chatlog").appendChild(d);$("chatlog").scrollTop=1e9;return d}
+function chips(){$("chips").innerHTML="";["c1","c2","c3"].forEach(function(k){var b=document.createElement("button");b.textContent=tr(k);b.onclick=function(){$("q").value=tr(k);ask()};$("chips").appendChild(b)});$("q").placeholder=tr("ph")}
+async function ask(){var q=$("q").value.trim();if(!q)return;$("q").value="";addMsg("me",q);hist.push({role:"user",content:q});
+ var out=addMsg("ai",tr("thinking"));
+ try{if(!sampleFn)sampleFn=await claude.use("sample");if(!sampleFn)throw 0;
+  var P=phase(),ctx="You are AstroVrat, a friendly assistant for Indian families about festivals, vrats, pooja, sun, moon and stars. Answer briefly (under 120 words), in "+(lang=="hi"?"simple Hindi":"simple English")+". Say plainly when you are unsure and tell people to check a local panchang for exact muhurat. Today: "+new Date().toDateString()+". Location: "+pos.name+". Moon: "+pname(P.p)+", "+Math.round(P.f*100)+"% lit.";
+  var msgs=[{role:"user",content:ctx+"\n\n"+hist.slice(-6).map(function(m){return m.role+": "+m.content}).join("\n")}];
+  var r=await sampleFn(msgs,{cache:false,modelTier:"quick",onText:function(x){out.textContent=x.text}});out.textContent=r.text;hist.push({role:"assistant",content:r.text})
+ }catch(e){out.textContent=tr("aierr")}}
+$("send").onclick=ask;$("q").onkeydown=function(e){if(e.key=="Enter")ask()};
+
+// ---- sounds ----
+var ac;function tone(f,d,type,g){ac=ac||new(window.AudioContext||window.webkitAudioContext)();var o=ac.createOscillator(),v=ac.createGain();o.type=type||"sine";o.frequency.value=f;v.gain.setValueAtTime(g||.3,ac.currentTime);v.gain.exponentialRampToValueAtTime(.001,ac.currentTime+d);o.connect(v);v.connect(ac.destination);o.start();o.stop(ac.currentTime+d)}
+$("bell").onclick=function(){var b=$("bi");b.classList.remove("swing");void b.offsetWidth;b.classList.add("swing");tone(880,2.5);tone(1320,2,"sine",.15);tone(1760,1.5,"sine",.08)};
+$("shankh").onclick=function(){tone(220,2.5,"sawtooth",.18);tone(330,2.5,"triangle",.15)};
+
+// ---- confetti ----
+window.celebrate=function(){var c=$("conf"),x=c.getContext("2d");c.width=innerWidth;c.height=innerHeight;var p=[];for(var i=0;i<140;i++)p.push({x:Math.random()*c.width,y:-10-Math.random()*200,v:2+Math.random()*4,s:4+Math.random()*6,c:["#E8C872","#fff","#ff9f43","#C9D1E0"][i%4]});
+ var n=0;(function f(){x.clearRect(0,0,c.width,c.height);p.forEach(function(q){q.y+=q.v;q.x+=Math.sin(q.y/20);x.fillStyle=q.c;x.fillRect(q.x,q.y,q.s,q.s)});if(++n<260)requestAnimationFrame(f);else x.clearRect(0,0,c.width,c.height)})();tone(880,2)};
+
+// ---- animated sky ----
+var cv=$("sky"),cx=cv.getContext("2d"),stars=[],shoot=[];
+cv.onclick=function(e){var r=cv.getBoundingClientRect();shoot.push({x:e.clientX-r.left-60,y:e.clientY-r.top-30,l:0});tone(1200,.4,"sine",.05)};
+function size(){cv.width=cv.clientWidth;cv.height=cv.clientHeight}
+size();addEventListener("resize",size);
+for(var i=0;i<90;i++)stars.push([Math.random(),Math.random()*.8,Math.random()*6.28]);
+(function draw(){var w=cv.width,h=cv.height,t=Date.now(),S=window._S||{},day=S.rise&&S.set&&t>S.rise&&t<S.set;
+ var g=cx.createLinearGradient(0,0,0,h);if(day){g.addColorStop(0,"#2b5a9c");g.addColorStop(1,"#f2b36b")}else{g.addColorStop(0,"#05070d");g.addColorStop(1,"#1a2140")}
+ cx.fillStyle=g;cx.fillRect(0,0,w,h);
+ if(!day)stars.forEach(function(s){cx.globalAlpha=.4+.6*Math.abs(Math.sin(t/900+s[2]));cx.fillStyle="#fff";cx.fillRect(s[0]*w,s[1]*h,1.6,1.6)});cx.globalAlpha=1;if(!day&&Math.random()<.004)shoot.push({x:Math.random()*w*.7,y:Math.random()*h*.4,l:0});shoot=shoot.filter(function(s){s.l+=1;s.x+=7;s.y+=3.5;var a=1-s.l/40;if(a<=0)return false;cx.strokeStyle="rgba(255,255,255,"+a+")";cx.lineWidth=1.5;cx.beginPath();cx.moveTo(s.x,s.y);cx.lineTo(s.x-40,s.y-20);cx.stroke();return true});
+ var f=day?(t-S.rise)/(S.set-S.rise):((t-dayStart())/864e5),f2=day?f:(f<.5?f+.5:f-.5);
+ var bx=w*Math.min(Math.max(f2,0),1),by=h*.75-Math.sin(Math.min(Math.max(f2,0),1)*PI)*h*.55;
+ cx.beginPath();cx.arc(bx,by,day?24:18,0,6.28);cx.fillStyle=day?"#ffd45e":"#e9edf5";cx.shadowColor=day?"#ffd45e":"#cfd8ff";cx.shadowBlur=30;cx.fill();cx.shadowBlur=0;
+ requestAnimationFrame(draw)})();
+
+if(typeof claude==="undefined"){var ac2=$("aicard");ac2.style.display="none";ac2.previousElementSibling.style.display="none"}
+render();
+})();
+</script>
+</body>
+</html>
