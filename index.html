@@ -123,11 +123,11 @@ function days(t){return t/864e5-0.5+2440588-2451545}
 function ra(l,b){return Math.atan2(Math.sin(l)*Math.cos(E)-Math.tan(b)*Math.sin(E),Math.cos(l))}
 function dc(l,b){return Math.asin(Math.sin(b)*Math.cos(E)+Math.cos(b)*Math.sin(E)*Math.sin(l))}
 function sunC(d){var M=R*(357.5291+0.98560028*d),C=R*(1.9148*Math.sin(M)+0.02*Math.sin(2*M)+0.0003*Math.sin(3*M)),L=M+C+R*102.9372+PI;return{dec:dc(L,0),ra:ra(L,0)}}
-function moonC(d){var L=R*(218.316+13.176396*d),M=R*(134.963+13.064993*d),F=R*(93.272+13.22935*d),D=R*(297.8502+445267.1115*d),Mp=M;
- l=L+R*(6.289*Math.sin(Mp)-1.274*Math.sin(2*D-Mp)+0.658*Math.sin(2*D)-0.186*Math.sin(Mp-M+2*D-2*Mp+Mp)+0.059*Math.sin(2*Mp-2*D));
- l=l-R*(0.057*Math.sin(2*D-M-Mp)+0.053*Math.sin(2*D+Mp)+0.046*Math.sin(2*D-M)+0.041*Math.sin(Mp-M)-0.035*Math.sin(D)-0.031*Math.sin(Mp+M)-0.015*Math.sin(2*F-2*D+Mp));
- var b=R*(5.128*Math.sin(F)+0.28*Math.sin(Mp+F)+0.277*Math.sin(Mp-F)+0.173*Math.sin(2*D-F));
- var dist=385001-20905*Math.cos(M)-3699*Math.cos(2*D-Mp)-2956*Math.cos(2*D);
+function moonC(d){var L=R*(218.316+13.176396*d),Mp=R*(134.963+13.064993*d),F=R*(93.272+13.22935*d),D=R*(297.8502+445267.1115*d),Ms=R*(357.5291+0.98560028*d);
+ var l=L+R*(6.289*Math.sin(Mp)-1.274*Math.sin(2*D-Mp)+0.658*Math.sin(2*D)-0.186*Math.sin(Ms)+0.059*Math.sin(2*Mp-2*D));
+ l=l-R*(0.057*Math.sin(2*D-Ms-Mp)+0.053*Math.sin(2*D+Mp)+0.046*Math.sin(2*D-Ms)+0.041*Math.sin(Mp-Ms)-0.035*Math.sin(D)-0.031*Math.sin(Mp+Ms)-0.015*Math.sin(2*F-2*D+Mp));
+ var b=R*(5.128*Math.sin(F)+0.28*Math.sin(Mp+F)+0.277*Math.sin(Mp-F)+0.173*Math.sin(2*D-F)+0.055*Math.sin(2*Mp-F));
+ var dist=385001-20905*Math.cos(Mp)-3699*Math.cos(2*D-Mp)-2956*Math.cos(2*D);
  return{ra:ra(l,b),dec:dc(l,b),dist:dist}}
 function alt(c,t,lat,lng){var d=days(t),H=R*(280.16+360.9856235*d)-(-lng*R)-c.ra,p=lat*R;return Math.asin(Math.sin(p)*Math.sin(c.dec)+Math.cos(p)*Math.cos(c.dec)*Math.cos(H))}
 function sunAlt(t,la,ln){return alt(sunC(days(t)),t,la,ln)-(-0.833*R)}
@@ -145,7 +145,7 @@ function phase(t0){var t=t0||Date.now(),d=days(t),s=sunC(d),m=moonC(d),sd=149598
  ang=Math.atan2(Math.cos(s.dec)*Math.sin(s.ra-m.ra),Math.sin(s.dec)*Math.cos(m.dec)-Math.cos(s.dec)*Math.sin(m.dec)*Math.cos(s.ra-m.ra));
  return{f:(1+Math.cos(inc))/2,p:0.5+0.5*inc*(ang<0?-1:1)/PI}}
 function pname(p){var n=[["New Moon","अमावस्या"],["Waxing Crescent","शुक्ल पक्ष (बढ़ता)"],["First Quarter","अष्टमी (शुक्ल)"],["Waxing Gibbous","बढ़ता गिब्बस"],["Full Moon","पूर्णिमा"],["Waning Gibbous","घटता गिब्बस"],["Last Quarter","अष्टमी (कृष्ण)"],["Waning Crescent","कृष्ण पक्ष (घटता)"]];return n[Math.round(p*8)%8][lang=="en"?0:1]}
-function fmt(t){return t?new Date(t).toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit",timeZone:"Asia/Kolkata"}):"—"}
+function fmt(t){return t?new Date(t).toLocaleTimeString(lang=="hi"?"hi-IN":"en-IN",{hour:"2-digit",minute:"2-digit",timeZone:"Asia/Kolkata"}):"—"}
 
 // ---- render ----
 function render(){
