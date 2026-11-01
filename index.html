@@ -57,6 +57,8 @@ button{transition:transform .15s,box-shadow .2s}button:active{transform:scale(.9
 input[type=range]{accent-color:#E8C872}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.js .card{opacity:1;transform:none}}
 .chips button{font-size:13px;padding:5px 10px}
+#phDay .row,#phNight .row{font-size:12px;gap:4px}
+#phDay .row:last-child,#phNight .row:last-child{border:0}
 </style>
 </head>
 <body>
@@ -77,6 +79,20 @@ input[type=range]{accent-color:#E8C872}
 
 <div class="sec" data-i="mp"></div>
 <div class="card"><div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><canvas id="mc" width="120" height="120"></canvas><div style="flex:1;min-width:200px"><div class="big" id="mdate"></div><div id="minfo" style="margin-bottom:8px"></div><div style="display:flex;gap:8px;align-items:center"><button id="mplay">▶</button><input type="range" id="msl" min="-15" max="15" value="0" style="flex:1"></div></div></div></div>
+
+<div class="sec" data-i="ph"></div>
+<div class="card">
+<div class="row" style="flex-direction:column;align-items:flex-start;gap:4px"><div style="display:flex;justify-content:space-between;width:100%"><span class="note" data-i="phDay"></span><span class="note" id="phdLord"></span></div><div id="phDay" style="width:100%"></div></div>
+<div class="row" style="flex-direction:column;align-items:flex-start;gap:4px;margin-top:8px"><div style="display:flex;justify-content:space-between;width:100%"><span class="note" data-i="phNight"></span><span class="note" id="phnLord"></span></div><div id="phNight" style="width:100%"></div></div>
+<div class="note" style="margin-top:8px" data-i="phNote"></div>
+</div>
+<div class="grid" style="margin-top:12px">
+<div class="card"><h2 data-i="rk"></h2><div id="rkBox"></div></div>
+<div class="card"><h2 data-i="yg"></h2><div id="ygBox"></div></div>
+<div class="card"><h2 data-i="gk"></h2><div id="gkBox"></div></div>
+</div>
+<div class="note" style="text-align:center;margin:8px 0" data-i="rkNote"></div>
+<div class="card" id="auBox"></div>
 
 <div class="sec" data-i="fest"></div>
 <div class="grid" id="fests"></div>
@@ -107,8 +123,8 @@ input[type=range]{accent-color:#E8C872}
 
 <script>
 (function(){
-var T={en:{tag:"Sun · Moon · Festivals for every family",ask:"🤖 Ask AstroVrat",next:"🌙 Next moonrise in",tithi:"📅 Today’s tithi",tnote:"Approximate. Check your panchang.",chk:"🪔 Pooja checklist",reset:"Reset",diya:"Tap the diya to light it",mp:"🌗 Moon phase explorer",sh:"Shukla Paksha",kr:"Krishna Paksha",ph:"Ask about a festival, vrat or the moon…",ainote:"AI answers can be wrong. Check your local panchang for exact muhurat.",thinking:"Thinking…",aierr:"AI is not available right now.",c1:"Why is moon seen on Karwa Chauth?",c2:"What is Chhath Puja?",c3:"Is tonight good for stargazing?",sun:"☀️ Sun",moon:"🌙 Moon",star:"✨ Stargazing score",clnote:"Based on moon brightness. Cloud cover not included.",fest:"Festival countdowns",fam:"Family city tracker",add:"Add city",share:"Share on WhatsApp",city:"City",moonrise:"Moonrise",sunset:"Sunset",ist:"All times in IST.",pooja:"Pooja corner",bell:"Temple bell",shankh:"Shankh",gps:"📍 Use my location",rise:"Rise",set:"Set",phase:"Phase",illum:"Illumination",d:"Days",h:"Hrs",m:"Min",s:"Sec",done:"Ritual complete ✓",today:"Today is the day!",none:"No rise today",loc:"Location",gpsUse:"📍 Use my location",gpsFail:"Location permission denied. Select a city instead.",gpsNA:"GPS not available on this device. Select a city instead.",gpsNear:"Nearest: ",gpsAsk:"📍 Allow location sharing for exact timings at your location?",gpsYes:"Allow",gpsNo:"Use default"},
-hi:{tag:"सूरज · चाँद · त्योहार, पूरे परिवार के लिए",ask:"🤖 AstroVrat से पूछिए",next:"🌙 अगला चंद्रोदय इतनी देर में",tithi:"📅 आज की तिथि",tnote:"अंदाज़ा। पंचांग से मिला लें।",chk:"🪔 पूजा चेकलिस्ट",reset:"साफ़ करें",diya:"दीया जलाने के लिए छुएँ",mp:"🌗 चाँद की कला देखिए",sh:"शुक्ल पक्ष",kr:"कृष्ण पक्ष",ph:"त्योहार, व्रत या चाँद के बारे में पूछिए…",ainote:"AI का जवाब गलत हो सकता है। सही मुहूर्त के लिए अपना पंचांग देखें।",thinking:"सोच रहा हूँ…",aierr:"AI अभी उपलब्ध नहीं है।",c1:"करवा चौथ पर चाँद क्यों देखते हैं?",c2:"छठ पूजा क्या है?",c3:"क्या आज रात तारे देखने लायक है?",sun:"☀️ सूरज",moon:"🌙 चाँद",star:"✨ तारे देखने का स्कोर",clnote:"चाँद की चमक पर आधारित। बादल शामिल नहीं।",fest:"त्योहार काउंटडाउन",fam:"परिवार के शहर",add:"शहर जोड़ें",share:"व्हाट्सऐप पर भेजें",city:"शहर",moonrise:"चंद्रोदय",sunset:"सूर्यास्त",ist:"सारे समय भारतीय समय (IST) में।",pooja:"पूजा कोना",bell:"मंदिर की घंटी",shankh:"शंख",gps:"📍 मेरी लोकेशन",rise:"उदय",set:"अस्त",phase:"कला",illum:"चमक",d:"दिन",h:"घंटे",m:"मिनट",s:"सेकंड",done:"पूजा पूरी ✓",today:"आज वही दिन है!",none:"आज उदय नहीं",loc:"स्थान",gpsUse:"📍 मेरी लोकेशन",gpsFail:"लोकेशन अनुमति नहीं मिली। शहर चुनें।",gpsNA:"GPS इस डिवाइस पर नहीं है। शहर चुनें।",gpsNear:"निकटतम: ",gpsAsk:"📍 सटीक समय के लिए लोकेशन शेयरिंग की अनुमति दें?",gpsYes:"अनुमति दें",gpsNo:"डिफ़ॉल्ट रहें"}};
+var T={en:{tag:"Sun · Moon · Festivals for every family",ask:"🤖 Ask AstroVrat",next:"🌙 Next moonrise in",tithi:"📅 Today’s tithi",tnote:"Approximate. Check your panchang.",chk:"🪔 Pooja checklist",reset:"Reset",diya:"Tap the diya to light it",mp:"🌗 Moon phase explorer",sh:"Shukla Paksha",kr:"Krishna Paksha",ph:"Ask about a festival, vrat or the moon…",ainote:"AI answers can be wrong. Check your local panchang for exact muhurat.",thinking:"Thinking…",aierr:"AI is not available right now.",c1:"Why is moon seen on Karwa Chauth?",c2:"What is Chhath Puja?",c3:"Is tonight good for stargazing?",sun:"☀️ Sun",moon:"🌙 Moon",star:"✨ Stargazing score",clnote:"Based on moon brightness. Cloud cover not included.",fest:"Festival countdowns",fam:"Family city tracker",add:"Add city",share:"Share on WhatsApp",city:"City",moonrise:"Moonrise",sunset:"Sunset",ist:"All times in IST.",pooja:"Pooja corner",bell:"Temple bell",shankh:"Shankh",gps:"📍 Use my location",rise:"Rise",set:"Set",phase:"Phase",illum:"Illumination",d:"Days",h:"Hrs",m:"Min",s:"Sec",done:"Ritual complete ✓",today:"Today is the day!",none:"No rise today",loc:"Location",gpsUse:"📍 Use my location",gpsFail:"Location permission denied. Select a city instead.",gpsNA:"GPS not available on this device. Select a city instead.",gpsNear:"Nearest: ",gpsAsk:"📍 Allow location sharing for exact timings at your location?",gpsYes:"Allow",gpsNo:"Use default",ph:"Planetary Hours & Auspicious Times",phDay:"Day Hours",phNight:"Night Hours",phNote:"Based on sunrise/sunset at your location. Chaldean order.",rk:"Rahu Kaal",yg:"Yamaganda Kaal",gk:"Gulika Kaal",rkNote:"Inauspicious periods — avoid new ventures. Times depend on sunrise & sunset.",au:"Auspicious Now",auNone:"No auspicious period right now",rks:"Rahu",ygs:"Yamaganda",gks:"Gulika",dayLords:["Sun","Moon","Mars","Mercury","Jupiter","Venus","Saturn"],planets:["Sun","Moon","Mars","Mercury","Jupiter","Venus","Saturn"]},
+hi:{tag:"सूरज · चाँद · त्योहार, पूरे परिवार के लिए",ask:"🤖 AstroVrat से पूछिए",next:"🌙 अगला चंद्रोदय इतनी देर में",tithi:"📅 आज की तिथि",tnote:"अंदाज़ा। पंचांग से मिला लें।",chk:"🪔 पूजा चेकलिस्ट",reset:"साफ़ करें",diya:"दीया जलाने के लिए छुएँ",mp:"🌗 चाँद की कला देखिए",sh:"शुक्ल पक्ष",kr:"कृष्ण पक्ष",ph:"त्योहार, व्रत या चाँद के बारे में पूछिए…",ainote:"AI का जवाब गलत हो सकता है। सही मुहूर्त के लिए अपना पंचांग देखें।",thinking:"सोच रहा हूँ…",aierr:"AI अभी उपलब्ध नहीं है।",c1:"करवा चौथ पर चाँद क्यों देखते हैं?",c2:"छठ पूजा क्या है?",c3:"क्या आज रात तारे देखने लायक है?",sun:"☀️ सूरज",moon:"🌙 चाँद",star:"✨ तारे देखने का स्कोर",clnote:"चाँद की चमक पर आधारित। बादल शामिल नहीं।",fest:"त्योहार काउंटडाउन",fam:"परिवार के शहर",add:"शहर जोड़ें",share:"व्हाट्सऐप पर भेजें",city:"शहर",moonrise:"चंद्रोदय",sunset:"सूर्यास्त",ist:"सारे समय भारतीय समय (IST) में।",pooja:"पूजा कोना",bell:"मंदिर की घंटी",shankh:"शंख",gps:"📍 मेरी लोकेशन",rise:"उदय",set:"अस्त",phase:"कला",illum:"चमक",d:"दिन",h:"घंटे",m:"मिनट",s:"सेकंड",done:"पूजा पूरी ✓",today:"आज वही दिन है!",none:"आज उदय नहीं",loc:"स्थान",gpsUse:"📍 मेरी लोकेशन",gpsFail:"लोकेशन अनुमति नहीं मिली। शहर चुनें।",gpsNA:"GPS इस डिवाइस पर नहीं है। शहर चुनें।",gpsNear:"निकटतम: ",gpsAsk:"📍 सटीक समय के लिए लोकेशन शेयरिंग की अनुमति दें?",gpsYes:"अनुमति दें",gpsNo:"डिफ़ॉल्ट रहें",ph:"ग्रह घंटे एवं शुभ समय",phDay:"दिन के घंटे",phNight:"रात के घंटे",phNote:"आपके स्थान के सूर्योदय/अस्त पर आधारित। चाल्डियन क्रम।",rk:"राहु काल",yg:"यमगांड काल",gk:"गुलिका काल",rkNote:"अशुभ काल — नए कार्य न करें। समय सूर्योदय/अस्त पर निर्भर।",au:"अभी शुभ काल",auNone:"अभी कोई शुभ काल नहीं",rks:"राहु",ygs:"यमगांड",gks:"गुलिका",dayLords:["सूर्य","चंद्र","मंगल","बुध","गुरु","शुक्र","शनि"],planets:["सूर्य","चंद्र","मंगल","बुध","गुरु","शुक्र","शनि"]}};
 var lang="en",pos={name:"Meerut",lat:28.98,lng:77.71};
 var CITIES=[["Delhi",28.61,77.21],["Mumbai",19.08,72.88],["Kolkata",22.57,88.36],["Chennai",13.08,80.27],["Jaipur",26.91,75.79],["Lucknow",26.85,80.95],["Patna",25.59,85.14],["Meerut",28.98,77.71],["Ahmedabad",23.02,72.57],["Hyderabad",17.39,78.49],["Bengaluru",12.97,77.59],["Pune",18.52,73.86],["Bhopal",23.26,77.41],["Chandigarh",30.73,76.78],["Varanasi",25.32,82.99],["Dehradun",30.32,78.03],["Ranchi",23.34,85.31]];
 var fam=[CITIES[0],CITIES[1],CITIES[7]];
@@ -157,7 +173,7 @@ function render(){
  $("sunr").innerHTML=rw(tr("rise"),fmt(S.rise))+rw(tr("set"),fmt(S.set));
  $("moonr").innerHTML=rw(tr("rise"),M.rise?fmt(M.rise):tr("none"))+rw(tr("set"),M.set?fmt(M.set):tr("none"))+rw(tr("phase"),pname(P.p))+rw(tr("illum"),Math.round(P.f*100)+"%");
  $("clar").textContent=Math.round(100-P.f*70)+"/100";
- window._nr=nextRise();$("tithi").textContent=tithiTxt(P.p);fams();fests();chips();renderChk();window._S=S;window._M=M;mp();reveal();
+ window._nr=nextRise();$("tithi").textContent=tithiTxt(P.p);fams();fests();chips();renderChk();window._S=S;window._M=M;mp();renderPH();reveal();
 }
 function fams(){var h="",txt="🌙 AstroVrat\n";
  fam.forEach(function(c){var m=events(moonAlt,c[1],c[2]),s=events(sunAlt,c[1],c[2]);
@@ -171,6 +187,7 @@ function tick(){if(window._nr){var q=window._nr-Date.now();if(q>0){$("nextm").te
  var D=Math.floor(d/864e5),H=Math.floor(d%864e5/36e5),Mi=Math.floor(d%36e5/6e4),Se=Math.floor(d%6e4/1e3);
  e.innerHTML=[[D,"d"],[H,"h"],[Mi,"m"],[Se,"s"]].map(function(x){return"<div>"+x[0]+"<small>"+tr(x[1])+"</small></div>"}).join("")})}
 setInterval(tick,1000);
+setInterval(renderPH,5000);
 
 // ---- city select ----
 var MORE="Agra,27.18,78.01;Aligarh,27.88,78.08;Prayagraj,25.44,81.85;Amritsar,31.63,74.87;Aurangabad,19.88,75.34;Bareilly,28.35,79.43;Belagavi,15.85,74.50;Bhubaneswar,20.30,85.82;Bikaner,28.02,73.31;Bilaspur,22.08,82.14;Coimbatore,11.02,76.96;Cuttack,20.46,85.88;Dhanbad,23.80,86.43;Faridabad,28.41,77.31;Firozabad,27.15,78.40;Ghaziabad,28.67,77.45;Gorakhpur,26.76,83.37;Gurugram,28.46,77.03;Guwahati,26.14,91.74;Gwalior,26.22,78.18;Haridwar,29.95,78.16;Hubballi,15.36,75.12;Imphal,24.82,93.95;Indore,22.72,75.86;Itanagar,27.08,93.61;Jabalpur,23.18,79.99;Jalandhar,31.33,75.58;Jammu,32.73,74.87;Jamnagar,22.47,70.07;Jamshedpur,22.80,86.20;Jodhpur,26.29,73.02;Kanpur,26.45,80.35;Kochi,9.93,76.27;Kohima,25.67,94.11;Kolhapur,16.70,74.24;Kota,25.18,75.84;Kozhikode,11.26,75.78;Ludhiana,30.90,75.86;Madurai,9.93,78.12;Mangaluru,12.91,74.86;Mathura,27.49,77.67;Mysuru,12.30,76.64;Nagpur,21.15,79.09;Nashik,20.00,73.79;Noida,28.54,77.39;Panaji,15.50,73.83;Patiala,30.34,76.39;Puducherry,11.93,79.83;Raipur,21.25,81.63;Rajkot,22.30,70.80;Saharanpur,29.97,77.55;Shillong,25.57,91.88;Shimla,31.10,77.17;Siliguri,26.73,88.40;Srinagar,34.08,74.80;Surat,21.17,72.83;Thiruvananthapuram,8.52,76.94;Tiruchirappalli,10.79,78.70;Udaipur,24.59,73.71;Ujjain,23.18,75.78;Vadodara,22.31,73.18;Vijayawada,16.51,80.65;Visakhapatnam,17.69,83.22;Warangal,17.97,79.59;Ayodhya,26.80,82.20;Moradabad,28.84,78.78;Muzaffarpur,26.12,85.39;Gaya,24.80,85.00;Bhagalpur,25.24,86.97;Agartala,23.83,91.28;Aizawl,23.73,92.72;Gangtok,27.34,88.61;Port Blair,11.62,92.73;Leh,34.15,77.58;Solapur,17.66,75.91;Amravati,20.93,77.75;Nanded,19.14,77.32;Salem,11.66,78.15;Tirupati,13.63,79.42;Guntur,16.31,80.44;Nellore,14.44,79.99;Rourkela,22.26,84.85;Durgapur,23.55,87.32;Asansol,23.68,86.98;Jhansi,25.45,78.57;Rishikesh,30.09,78.27;Nainital,29.39,79.46;Haldwani,29.22,79.51;Rewari,28.20,76.62;Rohtak,28.90,76.61;Hisar,29.15,75.72;Ambala,30.38,76.78;Karnal,29.69,76.99;Panipat,29.39,76.97;Sonipat,28.99,77.02;Alwar,27.55,76.63;Ajmer,26.45,74.64;Bhilwara,25.35,74.64;Sikar,27.61,75.14;Pushkar,26.49,74.55;Dwarka,22.24,68.97;Somnath,20.89,70.40;Bhavnagar,21.76,72.15;Gandhinagar,23.22,72.65;Silvassa,20.27,73.02;Daman,20.40,72.83;Vrindavan,27.58,77.70;Kurukshetra,29.97,76.88;Bodh Gaya,24.70,84.99;Darbhanga,26.15,85.90;Purnia,25.78,87.47;Satna,24.60,80.83;Rewa,24.53,81.30;Sagar,23.84,78.74;Bhilai,21.21,81.38;Korba,22.35,82.68;Sambalpur,21.47,83.97;Puri,19.81,85.83;Berhampur,19.31,84.79;Kharagpur,22.35,87.32;Howrah,22.59,88.26;Malda,25.01,88.14;Darjeeling,27.04,88.26;Dibrugarh,27.47,94.91;Silchar,24.83,92.78;Jorhat,26.76,94.20;Thrissur,10.53,76.21;Kollam,8.89,76.61;Vellore,12.92,79.13;Thanjavur,10.79,79.14;Erode,11.34,77.72;Tirunelveli,8.73,77.70;Kanyakumari,8.09,77.54;Rameswaram,9.29,79.31;Davangere,14.46,75.92;Ballari,15.14,76.92;Kalaburagi,17.33,76.83;Shivamogga,13.93,75.57;Karimnagar,18.44,79.13;Nizamabad,18.67,78.09;Kurnool,15.83,78.04;Anantapur,14.68,77.60;Kadapa,14.47,78.82;Rajahmundry,17.00,81.80;Kakinada,16.96,82.24;Latur,18.40,76.58;Akola,20.71,77.00;Jalgaon,21.01,75.56;Satara,17.69,74.00;Sangli,16.85,74.57;Shirdi,19.77,74.48;Pandharpur,17.68,75.33;Ratnagiri,16.99,73.30";
@@ -208,6 +225,124 @@ function askGPS(){
 var TN={en:["Pratipada","Dwitiya","Tritiya","Chaturthi","Panchami","Shashthi","Saptami","Ashtami","Navami","Dashami","Ekadashi","Dwadashi","Trayodashi","Chaturdashi"],hi:["प्रतिपदा","द्वितीया","तृतीया","चतुर्थी","पंचमी","षष्ठी","सप्तमी","अष्टमी","नवमी","दशमी","एकादशी","द्वादशी","त्रयोदशी","चतुर्दशी"]};
 function tithiTxt(p){var n=Math.floor(p*30)%30,i=n%15,nm=i==14?(n==14?(lang=="en"?"Purnima":"पूर्णिमा"):(lang=="en"?"Amavasya":"अमावस्या")):TN[lang][i];return nm+(i==14?"":" · "+tr(n<15?"sh":"kr"))}
 function nextRise(){var t=Date.now(),p=moonAlt(t,pos.lat,pos.lng);for(var i=1;i<=180;i++){var t1=t+i*600000,a=moonAlt(t1,pos.lat,pos.lng);if(p<0&&a>=0)return bisect(moonAlt,t,t1,pos.lat,pos.lng);p=a}return null}
+
+// ---- planetary hours & auspicious timings ----
+// Chaldean order: Sun, Venus, Mercury, Moon, Saturn, Jupiter, Mars
+var CHAL=[0,5,3,1,6,4,2];
+// Rahu Kaal segments by weekday index (0=Sun): [slot index 1-8]
+var RK_SLOT=[8,2,7,5,6,4,3];
+var YG_SLOT=[5,4,3,2,1,7,6];
+var GK_SLOT={[0]:7,[1]:6,[2]:5,[3]:4,[4]:3,[5]:2,[6]:1};
+var WD_EN=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+var WD_HI=["रविवार","सोमवार","मंगलवार","बुधवार","गुरुवार","शुक्रवार","शनिवार"];
+
+function planetHours(S){
+ if(!S.rise||!S.set)return null;
+ var sr=S.rise,ss=S.set;
+ // next sunrise (approx +1 day)
+ var sr2=sr+864e5;
+ var dayDur=ss-sr,nightDur=sr2-ss;
+ var dayH=[],nightH=[];
+ var wd=new Date(sr).toLocaleDateString("en-US",{weekday:"short",timeZone:"Asia/Kolkata"});
+ var wdMap={Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6};
+ var wdIdx=wdMap[wd]||0;
+ // first planetary hour of the day is ruled by the day lord (0=Sun...6=Saturn)
+ var startLord=wdIdx;
+ for(var i=0;i<12;i++){
+  var lord=CHAL[(CHAL.indexOf(startLord)+i)%7];
+  var hs=sr+dayDur*i/12,he=sr+dayDur*(i+1)/12;
+  dayH.push({lord:lord,start:hs,end:he});
+ }
+ var nightStartLord=CHAL[(CHAL.indexOf(startLord)+12)%7];
+ for(var j=0;j<12;j++){
+  var lord2=CHAL[(CHAL.indexOf(nightStartLord)+j)%7];
+  var hs2=ss+nightDur*j/12,he2=ss+nightDur*(j+1)/12;
+  nightH.push({lord:lord2,start:hs2,end:he2});
+ }
+ return{day:dayH,night:nightH,wdIdx:wdIdx};
+}
+function auspiciousSlots(S){
+ if(!S.rise||!S.set)return null;
+ var sr=S.rise,ss=S.set;
+ var dayDur=(ss-sr)/8;
+ var wd=new Date(sr).toLocaleDateString("en-US",{weekday:"short",timeZone:"Asia/Kolkata"});
+ var wdMap={Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6};
+ var wdIdx=wdMap[wd]||0;
+ function slot(n){return{start:sr+dayDur*(n-1),end:sr+dayDur*n}}
+ var rk=RK_SLOT[wdIdx],yg=YG_SLOT[wdIdx],gk=GK_SLOT[wdIdx];
+ return{
+  rahu:slot(rk),yamaganda:slot(yg),gulika:slot(gk)
+ };
+}
+function renderPH(){
+ var S=window._S;if(!S){return}
+ var ph=planetHours(S);
+ if(!ph){
+  $("phDay").innerHTML='<span class="note">—</span>';
+  $("phNight").innerHTML='<span class="note">—</span>';
+  $("phdLord").textContent="";$("phnLord").textContent="";
+  $("rkBox").innerHTML='<span class="note">—</span>';
+  $("ygBox").innerHTML='<span class="note">—</span>';
+  $("gkBox").innerHTML='<span class="note">—</span>';
+  $("auBox").innerHTML='<span class="note">—</span>';
+  return;
+ }
+ var pl=lang=="hi"?T[lang].planets:T[lang].dayLords;
+ function phRow(h,active){
+  var n=h.lord;
+  var nm=lang=="hi"?["सूर्य","चंद्र","मंगल","बुध","गुरु","शुक्र","शनि"][n]:["Sun","Moon","Mars","Mercury","Jupiter","Venus","Saturn"][n];
+  var sym=["☉","☾","♂","☿","♃","♀","♄"][n];
+  var good=[3,4,0].indexOf(n)>=0; // Mercury, Jupiter, Sun = auspicious
+  var bad=[2,6].indexOf(n)>=0; // Mars, Saturn = inauspicious
+  var cls=active?"background:rgba(232,200,114,.15);border-color:var(--gold)":(good?"background:rgba(100,200,100,.06)":"");
+  var cl=good?"color:#7fd07f":(bad?"color:#e07f7f":"color:var(--silver)");
+  return '<div class="row" style="'+cls+';padding:3px 8px;border-radius:6px;margin:2px 0;font-size:13px"><span style="'+cl+'">'+sym+' '+nm+'</span><b style="font-size:12px">'+fmt(h.start)+'–'+fmt(h.end)+'</b></div>';
+ }
+ var now=Date.now();
+ var dh="",nh="";
+ var dActive=-1,nActive=-1;
+ ph.day.forEach(function(h,i){if(now>=h.start&&now<h.end)dActive=i});
+ ph.night.forEach(function(h,i){if(now>=h.start&&now<h.end)nActive=i});
+ dh=ph.day.map(function(h,i){return phRow(h,i==dActive)}).join("");
+ nh=ph.night.map(function(h,i){return phRow(h,i==nActive)}).join("");
+ $("phDay").innerHTML=dh;$("phNight").innerHTML=nh;
+ var wdN=lang=="hi"?WD_HI:WD_EN;
+ $("phdLord").textContent=wdN[ph.wdIdx]+" — "+(lang=="hi"?"दिन स्वामी":"Day Lord")+": "+(lang=="hi"?["सूर्य","चंद्र","मंगल","बुध","गुरु","शुक्र","शनि"][ph.wdIdx]:["Sun","Moon","Mars","Mercury","Jupiter","Venus","Saturn"][ph.wdIdx]);
+ $("phnLord").textContent=(lang=="hi"?"रात स्वामी":"Night Lord")+": "+(lang=="hi"?["सूर्य","चंद्र","मंगल","बुध","गुरु","शुक्र","शनि"][CHAL[(CHAL.indexOf(ph.wdIdx)+12)%7]]:["Sun","Moon","Mars","Mercury","Jupiter","Venus","Saturn"][CHAL[(CHAL.indexOf(ph.wdIdx)+12)%7]]);
+
+ // auspicious / inauspicious slots
+ var au=auspiciousSlots(S);
+ function slotBox(s,name){
+  if(!s)return'<span class="note">—</span>';
+  var active=now>=s.start&&now<s.end;
+  var cl=active?"color:#e07f7f;font-weight:600":"";
+  return'<div style="'+(active?"background:rgba(224,127,127,.12);padding:8px;border-radius:8px":"")+'"><div class="row"><span>'+name+'</span><b style="'+cl+'">'+fmt(s.start)+' – '+fmt(s.end)+'</b></div>'+(active?'<div class="note" style="color:#e07f7f;margin-top:4px">'+(lang=="hi"?"अभी चल रहा है":"Active now")+'</div>':'')+'</div>';
+ }
+ var rkn=lang=="hi"?T[lang].rks:"Rahu",ygn=lang=="hi"?T[lang].ygs:"Yamaganda",gkn=lang=="hi"?T[lang].gks:"Gulika";
+ $("rkBox").innerHTML=slotBox(au.rahu,rkn);
+ $("ygBox").innerHTML=slotBox(au.yamaganda,ygn);
+ $("gkBox").innerHTML=slotBox(au.gulika,gkn);
+
+ // current auspicious summary
+ var goodNow=[];
+ ph.day.forEach(function(h){if(now>=h.start&&now<h.end){if([3,4,0,1].indexOf(h.lord)>=0)goodNow.push({name:(lang=="hi"?["सूर्य","चंद्र","मंगल","बुध","गुरु","शुक्र","शनि"][h.lord]:["Sun","Moon","Mars","Mercury","Jupiter","Venus","Saturn"][h.lord]),end:h.end})}});
+ ph.night.forEach(function(h){if(now>=h.start&&now<h.end){if([3,4,0,1].indexOf(h.lord)>=0)goodNow.push({name:(lang=="hi"?["सूर्य","चंद्र","मंगल","बुध","गुरु","शुक्र","शनि"][h.lord]:["Sun","Moon","Mars","Mercury","Jupiter","Venus","Saturn"][h.lord]),end:h.end})}});
+ var inRK=au.rahu&&now>=au.rahu.start&&now<au.rahu.end;
+ var inYG=au.yamaganda&&now>=au.yamaganda.start&&now<au.yamaganda.end;
+ var inGK=au.gulika&&now>=au.gulika.start&&now<au.gulika.end;
+ var auh="";
+ if(goodNow.length>0&&!inRK&&!inYG&&!inGK){
+  var g=goodNow[0];
+  auh='<div style="text-align:center"><div style="font-size:20px;color:#7fd07f">✓ '+(lang=="hi"?"अभी शुभ काल":"Auspicious now")+'</div><div class="note" style="margin-top:6px">'+(lang=="hi"?g.name+" घंटा चल रहा है · "+g.name+" hour active":"Now in "+g.name+" hour")+'<br>'+(lang=="hi"?"समाप्त":"Ends")+' '+fmt(g.end)+'</div></div>';
+ }else if(inRK||inYG||inGK){
+  var ip=inRK?(lang=="hi"?"राहु काल":"Rahu Kaal"):inYG?(lang=="hi"?"यमगांड":"Yamaganda"):(lang=="hi"?"गुलिका":"Gulika");
+  var ipEnd=inRK?au.rahu.end:inYG?au.yamaganda.end:au.gulika.end;
+  auh='<div style="text-align:center"><div style="font-size:18px;color:#e07f7f">⚠ '+ip+'</div><div class="note" style="margin-top:6px">'+(lang=="hi"?"अशुभ काल चल रहा है · समाप्त ":"Inauspicious · ends ")+fmt(ipEnd)+'</div></div>';
+ }else{
+  auh='<div style="text-align:center"><div style="font-size:16px;color:var(--silver)">'+tr("auNone")+'</div></div>';
+ }
+ $("auBox").innerHTML=auh;
+}
 var CHK={en:["Diya, ghee and matchbox","Fresh flowers","Kalash with water","Prasad / sweets","Pooja thali ready","Family told the moonrise time"],hi:["दीया, घी और माचिस","ताज़े फूल","पानी से भरा कलश","प्रसाद / मिठाई","पूजा की थाली तैयार","परिवार को चंद्रोदय का समय बताया"]};
 function ld(){try{return JSON.parse(localStorage.getItem("av_chk")||"{}")}catch(e){return{}}}
 function sv(s){try{localStorage.setItem("av_chk",JSON.stringify(s))}catch(e){}}
